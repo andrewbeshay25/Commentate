@@ -18,7 +18,8 @@ class Comment(BaseModel):
 comments = {
     0: Comment(id=0, message="You are so handsome", name="Andrew", catagory=Catagories.COMPLIMENT),
     2: Comment(id=2, message="You are so ulgy", name="Mark", catagory=Catagories.ROAST),
-    1: Comment(id=1, message="You are so weak", name="Derek", catagory=Catagories.ROAST)
+    1: Comment(id=1, message="You are so weak", name="Derek", catagory=Catagories.ROAST),
+    2: Comment(id=2, message="You smell good", name="Andrew", catagory=Catagories.COMPLIMENT)
 }
 
 @app.get("/")
@@ -28,9 +29,7 @@ def index() -> dict[str, dict[int, Comment]]:
 @app.get("/comments/{item_id}")
 def query_comment_by_catatgory(item_id: int) -> Comment:
     if item_id not in comments:
-        raise HTTPException(
-            status_code=404, detail=f"Itenm with id: {item_id} does not exist."
-        )
+        HTTPException(status_code=404, detail=f"Itenm with id: {item_id} does not exist.")
     return comments[item_id]
 
 Selection = dict[
@@ -54,3 +53,10 @@ def query_comment_by_parameters(
 
     return {"query": {"name": name, "message": message, "catagory": catagory},
             "selection" : selection}
+
+@app.post("/")
+def add_comment(comment: Comment) -> dict[str, Comment]:
+    if (comment.id in comments):
+        raise HTTPException(status_code=400, detail=f"Comment with id: {comment.id} already exists.")
+    comments[comment.id] = comment
+    return {"Added": comment}
