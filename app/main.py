@@ -2,10 +2,19 @@ from enum import Enum
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-class Catagories(Enum):
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class Categories(Enum):
     ROAST = "roast"
     COMPLIMENT = "compliment"
 
@@ -13,13 +22,13 @@ class Comment(BaseModel):
     id: int
     message: str
     name: str
-    catagory: Catagories
+    category: Categories
 
 comments = {
-    0: Comment(id=0, message="You are so handsome", name="Andrew", catagory=Catagories.COMPLIMENT),
-    2: Comment(id=2, message="You are so ulgy", name="Mark", catagory=Catagories.ROAST),
-    1: Comment(id=1, message="You are so weak", name="Derek", catagory=Catagories.ROAST),
-    2: Comment(id=2, message="You smell good", name="Andrew", catagory=Catagories.COMPLIMENT)
+    0: Comment(id=0, message="You are so handsome", name="Andrew", category=Categories.COMPLIMENT),
+    2: Comment(id=2, message="You are so ulgy", name="Mark", category=Categories.ROAST),
+    1: Comment(id=1, message="You are so weak", name="Derek", category=Categories.ROAST),
+    2: Comment(id=2, message="You smell good", name="Andrew", category=Categories.COMPLIMENT)
 }
 
 @app.get("/")
@@ -27,31 +36,31 @@ def index() -> dict[str, dict[int, Comment]]:
     return {"comments" : comments}
 
 @app.get("/comments/{item_id}")
-def query_comment_by_catatgory(item_id: int) -> Comment:
+def query_comment_by_catetgory(item_id: int) -> Comment:
     if item_id not in comments:
         HTTPException(status_code=404, detail=f"Itenm with id: {item_id} does not exist.")
     return comments[item_id]
 
 Selection = dict[
-    str, str | int | Catagories | None
+    str, str | int | Categories | None
 ]
 
 @app.get("/comments/")
 def query_comment_by_parameters(
     name: str | None = None,
     message: str | None = None,
-    catagory: Catagories | None = None
+    category: Categories | None = None
 ) -> dict[str, Selection | list[Comment]]:
     def check_comment(comment: Comment):
         return all((
             (name is None or comment.name == name),
             (message is None or comment.message == message),
-            (catagory is None or comment.catagory == catagory)
+            (category is None or comment.category == category)
         ))
 
     selection = [comment for comment in comments.values() if check_comment(comment)]
 
-    return {"query": {"name": name, "message": message, "catagory": catagory},
+    return {"query": {"name": name, "message": message, "category": category},
             "selection" : selection}
 
 @app.post("/")

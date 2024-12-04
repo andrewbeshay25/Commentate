@@ -10,6 +10,6 @@ elif response == '3':
     print(
     requests.post(
         "http://127.0.0.1:8000/",
-        json={"id": 3, "message": "You suck at this!", "name": "Frank", "catagory": "roast"},
+        json={"id": 3, "message": "You suck at this!", "name": "Frank", "category": "roast"},
     ).json()
     )
