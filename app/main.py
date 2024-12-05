@@ -1,11 +1,25 @@
 from enum import Enum
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
+from typing import Optional, Annotated
+
+import db.models as models
+from db.database import engine, SessionLocal
+from sqlalchemy.orm import Session 
 
 app = FastAPI()
+models.Base.metadata.create_all(bind=engine)
+
+# DB STUFF
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+db_dependency = Annotated[Session, Depends(get_db)]
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,8 +48,10 @@ comments = {
     0: Comment(id=0, message="You are so handsome", name="Andrew", category=Categories.COMPLIMENT),
     2: Comment(id=2, message="You are so ulgy", name="Mark", category=Categories.ROAST),
     1: Comment(id=1, message="You are so weak", name="Derek", category=Categories.ROAST),
-    3: Comment(id=3, message="You smell good", name="Andrew", category=Categories.COMPLIMENT)
+    3: Comment(id=3, message="You smell good", name="Kate", category=Categories.COMPLIMENT)
 }
+
+
 
 @app.get("/")
 def index() -> dict[str, dict[int, Comment]]:
@@ -76,3 +92,30 @@ def add_comment(comment_create: CommentCreate) -> dict:
     comment = Comment(id=new_id, **comment_create.dict())
     comments[new_id] = comment
     return {"Added": comment}
+
+
+@app.post("/comments/")
+async def create_comment(
+    comment: models.Comments, db: db_dependency
+):
+    # Create and save a new comment
+    db_comment = models.Comments(
+        comment_message=comment.comment_message,
+        comment_name=comment.comment_name,
+        comment_category=comment.comment_category,
+    )
+    db.add(db_comment)  # Add the new comment
+    db.commit()  # Commit the transaction
+    db.refresh(db_comment)  # Refresh to fetch auto-generated ID
+
+    # Return the created comment with its new ID
+    return {
+        "id": db_comment.id,
+        "message": "Comment created successfully!",
+        "comment": {
+            "id": db_comment.id,
+            "comment_message": db_comment.comment_message,
+            "comment_name": db_comment.comment_name,
+            "comment_category": db_comment.comment_category.value,
+        },
+    }
