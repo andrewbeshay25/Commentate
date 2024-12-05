@@ -19,8 +19,13 @@ class Categories(Enum):
     ROAST = "roast"
     COMPLIMENT = "compliment"
 
-class Comment(BaseModel):
-    id: Optional[int]
+class CommentCreate(BaseModel):
+    message: str
+    name: str
+    category: Categories
+
+class Comment(CommentCreate):
+    id: int
     message: str
     name: str
     category: Categories
@@ -65,9 +70,9 @@ def query_comment_by_parameters(
             "selection" : selection}
 
 @app.post("/")
-def add_comment(comment: Comment) -> dict:
-    # Auto-generate an ID if it's not provided
+def add_comment(comment_create: CommentCreate) -> dict:
+    # Auto-generate an ID
     new_id = max(comments.keys(), default=0) + 1
-    comment.id = new_id
+    comment = Comment(id=new_id, **comment_create.dict())
     comments[new_id] = comment
     return {"Added": comment}

@@ -75,13 +75,11 @@ async function queryComments(event) {
 
 async function addComment(event) {
     event.preventDefault();
-    const id = document.getElementById("id").value;
     const message = document.getElementById("add-message").value;
     const name = document.getElementById("add-name").value;
     const category = document.getElementById("add-category").value;
 
     const newComment = {
-        id: parseInt(id),
         message,
         name,
         category
