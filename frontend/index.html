@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commentate</title>
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body>
+    <div class="container">
+        <h1 id="title">Commentate</h1>
+
+        <!-- Display all comments -->
+        <div class="text-center">
+            <button onclick="fetchAllComments()">Get All Comments</button>
+        </div>
+        <div id="comments-display"></div>
+
+        <hr>
+
+        <!-- Query comments by parameters -->
+        <h3>Query Comments</h3>
+        <form onsubmit="queryComments(event)">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name"><br>
+
+            <label for="message">Message:</label>
+            <input type="text" id="message" name="message"><br>
+
+            <label for="category">Category:</label>
+            <select id="category" name="category">
+                <option value="">--Select--</option>
+                <option value="roast">Roast</option>
+                <option value="compliment">Compliment</option>
+            </select><br>
+
+            <button type="submit">Search</button>
+        </form>
+        <div id="query-display"></div>
+
+        <hr>
+
+        <!-- Add a new comment -->
+        <h3>Add a Comment</h3>
+        <form onsubmit="addComment(event)">
+            <label for="id">ID:</label>
+            <input type="number" id="id" name="id" required><br>
+
+            <label for="message">Message:</label>
+            <input type="text" id="add-message" name="message" required><br>
+
+            <label for="name">Name:</label>
+            <input type="text" id="add-name" name="name" required><br>
+
+            <label for="category">Category:</label>
+            <select id="add-category" name="category" required>
+                <option value="roast">Roast</option>
+                <option value="compliment">Compliment</option>
+            </select><br>
+
+            <button type="submit">Add Comment</button>
+        </form>
+        <div id="add-result"></div>
+    </div>
+
+    <script>
+        const apiBaseUrl = "https://commentate.onrender.com"; // Use your Render URL if deployed
+
+        async function fetchAllComments() {
+            try {
+                const response = await fetch(`${apiBaseUrl}`);
+                console.log("Response object:", response); // Debugging log
+                if (!response.ok) throw new Error("Failed to fetch comments");
+
+                const data = await response.json();
+                console.log("Fetched data:", data); // Debugging log
+
+                const comments = data.comments;
+                console.log("Comments:", comments); // Debugging log
+
+                if (!comments || Object.keys(comments).length === 0) {
+                    document.getElementById("comments-display").innerHTML = "<p>No comments found.</p>";
+                    return;
+                }
+
+                let display = "<h3>All Comments</h3><ul>";
+                for (const id in comments) {
+                    display += `<li><b>${comments[id].name}</b>: ${comments[id].message} (${comments[id].category})</li>`;
+                }
+                display += "</ul>";
+
+                document.getElementById("comments-display").innerHTML = display;
+            } catch (error) {
+                console.error("Error fetching comments:", error);
+                document.getElementById("comments-display").innerHTML = `<p>Error fetching comments: ${error.message}</p>`;
+            }
+        }
+
+
+
+        async function queryComments(event) {
+            event.preventDefault();
+            const name = document.getElementById("name").value;
+            const message = document.getElementById("message").value;
+            const category = document.getElementById("category").value;
+
+            try {
+                // Create the query string
+                const params = new URLSearchParams();
+                if (name) params.append("name", name);
+                if (message) params.append("message", message);
+                if (category) params.append("category", category);
+
+                // Construct the full URL
+                const url = `${apiBaseUrl}/comments/?${params}`;
+                console.log("Request URL:", url); // Debugging log
+
+                // Fetch data from the API
+                const response = await fetch(url);
+                console.log("Response object:", response); // Debugging log
+                if (!response.ok) throw new Error("Failed to fetch comments");
+
+                const data = await response.json();
+                console.log("Fetched data:", data); // Debugging log
+
+                // Handle no results
+                if (!data.selection || data.selection.length === 0) {
+                    document.getElementById("query-display").innerHTML = "<p>No results found for the given parameters.</p>";
+                    return;
+                }
+
+                // Render the results
+                let display = `<h3>Results</h3><ul>`;
+                data.selection.forEach(comment => {
+                    display += `<li><b>${comment.name}</b>: ${comment.message} (${comment.category})</li>`;
+                });
+                display += "</ul>";
+
+                document.getElementById("query-display").innerHTML = display;
+            } catch (error) {
+                console.error("Error querying comments:", error);
+                document.getElementById("query-display").innerHTML = `<p>Error querying comments: ${error.message}</p>`;
+            }
+        }
+
+
+
+        async function addComment(event) {
+            event.preventDefault();
+            const id = document.getElementById("id").value;
+            const message = document.getElementById("add-message").value;
+            const name = document.getElementById("add-name").value;
+            const category = document.getElementById("add-category").value;
+
+            const newComment = {
+                id: parseInt(id),
+                message,
+                name,
+                category
+            };
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(newComment)
+                });
+                console.log("Response object:", response); // Debugging log
+                if (!response.ok) {
+                    const error = await response.json();
+                    console.error("Error:", error); // Debugging log
+                    document.getElementById("add-result").innerHTML = `<p>Error: ${error.detail}</p>`;
+                    return;
+                }
+
+                const result = await response.json();
+                console.log("Result:", result); // Debugging log
+                document.getElementById("add-result").innerHTML = `<p>Added: ${JSON.stringify(result.Added)}</p>`;
+            } catch (error) {
+                console.error("Error adding comment:", error);
+                document.getElementById("add-result").innerHTML = `<p>Error adding comment: ${error.message}</p>`;
+            }
+        }
+
+    </script>
+</body>
+
+</html>
