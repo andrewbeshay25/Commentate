@@ -1,0 +1,133 @@
+/* General Page Styling */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    color: #252525;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+#title{
+    color: #439f77;
+    font-weight: bold;
+}
+
+/* Container for Content */
+.container {
+    width: 90%;
+    max-width: 800px;
+    padding: 20px;
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* Header Styling */
+h1 {
+    color: #252525;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Section Styling */
+h3 {
+    color: #252525;
+    margin-top: 20px;
+}
+
+/* Button Styling */
+button {
+    background-color: #252525;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    display: block;
+    margin: 10px auto;
+    max-width: 200px;
+    text-align: center;
+}
+
+button:hover {
+    background-color: #3a3a3a;
+}
+
+/* Form Styling */
+form {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #252525;
+}
+
+input, select, button {
+    width: 100%;
+    max-width: 300px;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #252525;
+    box-shadow: 0 0 5px rgba(37, 37, 37, 0.3);
+}
+
+/* Results Display */
+#comments-display, #query-display, #add-result {
+    background: #f9f9f9;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling for lists */
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+ul li {
+    padding: 10px;
+    margin: 5px 0;
+    background: #eeeeee;
+    border-radius: 5px;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+}
+
+ul li b {
+    color: #252525;
+}
+
+/* Align Text to Center */
+.text-center {
+    text-align: center;
+}
+
+/* Padding for Inputs and Buttons */
+input, button, select {
+    display: block;
+    margin: 10px auto;
+}
