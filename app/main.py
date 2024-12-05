@@ -3,6 +3,7 @@ from enum import Enum
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Optional
 
 app = FastAPI()
 
@@ -19,7 +20,7 @@ class Categories(Enum):
     COMPLIMENT = "compliment"
 
 class Comment(BaseModel):
-    id: int
+    id: Optional[int]
     message: str
     name: str
     category: Categories
@@ -28,7 +29,7 @@ comments = {
     0: Comment(id=0, message="You are so handsome", name="Andrew", category=Categories.COMPLIMENT),
     2: Comment(id=2, message="You are so ulgy", name="Mark", category=Categories.ROAST),
     1: Comment(id=1, message="You are so weak", name="Derek", category=Categories.ROAST),
-    2: Comment(id=2, message="You smell good", name="Andrew", category=Categories.COMPLIMENT)
+    3: Comment(id=3, message="You smell good", name="Andrew", category=Categories.COMPLIMENT)
 }
 
 @app.get("/")
@@ -64,8 +65,9 @@ def query_comment_by_parameters(
             "selection" : selection}
 
 @app.post("/")
-def add_comment(comment: Comment) -> dict[str, Comment]:
-    if (comment.id in comments):
-        raise HTTPException(status_code=400, detail=f"Comment with id: {comment.id} already exists.")
-    comments[comment.id] = comment
+def add_comment(comment: Comment) -> dict:
+    # Auto-generate an ID if it's not provided
+    new_id = max(comments.keys(), default=0) + 1
+    comment.id = new_id
+    comments[new_id] = comment
     return {"Added": comment}
