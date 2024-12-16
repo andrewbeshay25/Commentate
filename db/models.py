@@ -1,6 +1,6 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Enum
-from database import Base
-from app.main import Categories
+from db.database import Base
+from app.categories import Categories  # Import Categories from the new file
 
 class Comments(Base):
     __tablename__ = 'comments'
