@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Commentate</title>
     <link rel="stylesheet" href="styles.css">
-
 </head>
 
 <body>
@@ -15,27 +14,24 @@
 
         <!-- Display all comments -->
         <div class="text-center">
-            <button onclick="fetchAllComments()">Get All Comments</button>
+            <button onclick="fetchAllComments()">View All Comments</button>
         </div>
         <div id="comments-display"></div>
 
         <hr>
 
-        <!-- Query comments by parameters -->
-        <h3>Query Comments</h3>
+        <!-- Search comments by filters -->
+        <h3>Search Comments</h3>
         <form onsubmit="queryComments(event)">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name"><br>
+            <label for="search-name">Name:</label>
+            <input type="text" id="search-name" placeholder="Enter name to search">
 
-            <label for="message">Message:</label>
-            <input type="text" id="message" name="message"><br>
-
-            <label for="category">Category:</label>
-            <select id="category" name="category">
-                <option value="">--Select--</option>
+            <label for="search-category">Category:</label>
+            <select id="search-category">
+                <option value="">-- Select Category --</option>
                 <option value="roast">Roast</option>
                 <option value="compliment">Compliment</option>
-            </select><br>
+            </select>
 
             <button type="submit">Search</button>
         </form>
@@ -44,20 +40,20 @@
         <hr>
 
         <!-- Add a new comment -->
-        <h3>Add a Comment</h3>
+        <h3>Add a New Comment</h3>
         <form onsubmit="addComment(event)">
+            <label for="add-name">Name:</label>
+            <input type="text" id="add-name" required placeholder="Enter your name">
 
-            <label for="name">Name:</label>
-            <input type="text" id="add-name" name="name" required><br>
+            <label for="add-message">Message:</label>
+            <input type="text" id="add-message" required placeholder="Enter your message">
 
-            <label for="message">Message:</label>
-            <input type="text" id="add-message" name="message" required><br>
-
-            <label for="category">Category:</label>
-            <select id="add-category" name="category" required>
+            <label for="add-category">Category:</label>
+            <select id="add-category" required>
+                <option value="">-- Select Category --</option>
                 <option value="roast">Roast</option>
                 <option value="compliment">Compliment</option>
-            </select><br>
+            </select>
 
             <button type="submit">Add Comment</button>
         </form>

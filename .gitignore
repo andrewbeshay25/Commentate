@@ -1,2 +1,6 @@
 __pycache__
 venv
+.env
+
+test_db_connection.py
+test_server.py

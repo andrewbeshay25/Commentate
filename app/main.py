@@ -1,11 +1,26 @@
 from enum import Enum
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
+from typing import Optional, Annotated, List
+from app.categories import Categories
+import db.models as models
+from db.database import engine, SessionLocal
+from sqlalchemy.orm import Session 
+from sqlalchemy import func
 
 app = FastAPI()
+models.Base.metadata.create_all(bind=engine)
+
+# DB STUFF
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+db_dependency = Annotated[Session, Depends(get_db)]
 
 app.add_middleware(
     CORSMiddleware,
@@ -15,10 +30,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class Categories(Enum):
-    ROAST = "roast"
-    COMPLIMENT = "compliment"
-
 class CommentCreate(BaseModel):
     message: str
     name: str
@@ -26,53 +37,70 @@ class CommentCreate(BaseModel):
 
 class Comment(CommentCreate):
     id: int
-    message: str
-    name: str
-    category: Categories
 
-comments = {
-    0: Comment(id=0, message="You are so handsome", name="Andrew", category=Categories.COMPLIMENT),
-    2: Comment(id=2, message="You are so ulgy", name="Mark", category=Categories.ROAST),
-    1: Comment(id=1, message="You are so weak", name="Derek", category=Categories.ROAST),
-    3: Comment(id=3, message="You smell good", name="Andrew", category=Categories.COMPLIMENT)
-}
+class CommentResponse(BaseModel):
+    id: int
+    comment_message: str
+    comment_name: str
+    comment_category: Categories
 
-@app.get("/")
-def index() -> dict[str, dict[int, Comment]]:
-    return {"comments" : comments}
+    model_config = {
+        "from_attributes": True  # Replace `orm_mode` with `from_attributes` in Pydantic v2
+    }
 
-@app.get("/comments/{item_id}")
-def query_comment_by_catetgory(item_id: int) -> Comment:
-    if item_id not in comments:
-        HTTPException(status_code=404, detail=f"Itenm with id: {item_id} does not exist.")
-    return comments[item_id]
+# GET endpoint for fetching comments with filters
+@app.get("/comments/", response_model=List[CommentResponse])
+def get_filtered_comments(
+    name: Optional[str] = None,
+    category: Optional[Categories] = None,
+    db: Session = Depends(get_db)
+):
+    try:
+        query = db.query(models.Comments)
 
-Selection = dict[
-    str, str | int | Categories | None
-]
+        # Apply filters dynamically
+        if name:
+            query = query.filter(func.lower(models.Comments.comment_name) == func.lower(name))
+        if category:
+            query = query.filter(models.Comments.comment_category == category)
 
-@app.get("/comments/")
-def query_comment_by_parameters(
-    name: str | None = None,
-    message: str | None = None,
-    category: Categories | None = None
-) -> dict[str, Selection | list[Comment]]:
-    def check_comment(comment: Comment):
-        return all((
-            (name is None or comment.name == name),
-            (message is None or comment.message == message),
-            (category is None or comment.category == category)
-        ))
+        # Fetch results
+        results = query.all()
 
-    selection = [comment for comment in comments.values() if check_comment(comment)]
+        # Return a friendly response when no data is found
+        if not results:
+            return []
 
-    return {"query": {"name": name, "message": message, "category": category},
-            "selection" : selection}
+        return results
 
-@app.post("/")
-def add_comment(comment_create: CommentCreate) -> dict:
-    # Auto-generate an ID
-    new_id = max(comments.keys(), default=0) + 1
-    comment = Comment(id=new_id, **comment_create.dict())
-    comments[new_id] = comment
-    return {"Added": comment}
+    except Exception as e:
+        # Handle unexpected errors (e.g., DB connection issues)
+        raise HTTPException(status_code=500, detail="An internal server error occurred.") from e
+
+
+@app.post("/comments/")
+async def create_comment(
+    comment: CommentCreate, db: db_dependency
+):
+    # Create a new comment instance for the database
+    db_comment = models.Comments(
+        comment_message=comment.message,
+        comment_name=comment.name,
+        comment_category=comment.category,
+    )
+    db.add(db_comment)  # Add the new comment to the session
+    db.commit()  # Commit the transaction
+    db.refresh(db_comment)  # Refresh to get the auto-generated ID
+
+    # Return the newly created comment
+    return {
+        "id": db_comment.id,
+        "message": "Comment created successfully!",
+        "comment": {
+            "id": db_comment.id,
+            "comment_message": db_comment.comment_message,
+            "comment_name": db_comment.comment_name,
+            "comment_category": db_comment.comment_category.value,
+        },
+    }
+
