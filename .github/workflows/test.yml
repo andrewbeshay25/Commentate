@@ -49,4 +49,4 @@ jobs:
         DATABASE_HOST: localhost
         DATABASE_PORT: 5432
       run: |
-        pytest --asyncio-mode=auto
+        python -m pytest --asyncio-mode=auto
