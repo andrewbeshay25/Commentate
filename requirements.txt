@@ -42,3 +42,5 @@ websockets==14.1
 
 fastapi[standard]
 uvicorn[standard]
+pytest
+pytest-asyncio
