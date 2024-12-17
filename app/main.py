@@ -44,8 +44,9 @@ class CommentResponse(BaseModel):
     comment_name: str
     comment_category: Categories
 
-    class Config:
-        from_attributes = True  # Replaces orm_mode in Pydantic V2
+    model_config = {
+        "from_attributes": True  # Replace `orm_mode` with `from_attributes` in Pydantic v2
+    }
 
 # GET endpoint for fetching comments with filters
 @app.get("/comments/", response_model=List[CommentResponse])
