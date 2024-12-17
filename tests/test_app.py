@@ -3,6 +3,7 @@ from httpx import AsyncClient
 from app.main import app  # Import the FastAPI app
 from db.database import Base, engine, SessionLocal
 from db.models import Comments, Categories
+from fastapi.testclient import TestClient
 
 # Test database setup
 @pytest.fixture(scope="function")
@@ -17,8 +18,8 @@ def test_db():
 # Test client for the FastAPI app
 @pytest.fixture(scope="function")
 async def client():
-    async with AsyncClient(app=app, base_url="http://test") as client:
-        yield client
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        yield ac
 
 # Test cases
 @pytest.mark.asyncio
