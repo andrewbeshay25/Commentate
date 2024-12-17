@@ -37,10 +37,6 @@ class CommentCreate(BaseModel):
 
 class Comment(CommentCreate):
     id: int
-    message: str
-    name: str
-    category: Categories
-
 
 class CommentResponse(BaseModel):
     id: int
@@ -58,25 +54,28 @@ def get_filtered_comments(
     category: Optional[Categories] = None,
     db: Session = Depends(get_db)
 ):
-    """
-    Fetch comments with optional filters: name and category.
-    """
-    query = db.query(models.Comments)
+    try:
+        query = db.query(models.Comments)
 
-    # Apply filters dynamically
-    if name:
-        query = query.filter(func.lower(models.Comments.comment_name) == func.lower(name))
-    if category:
-        query = query.filter(models.Comments.comment_category == category)
+        # Apply filters dynamically
+        if name:
+            query = query.filter(func.lower(models.Comments.comment_name) == func.lower(name))
+        if category:
+            query = query.filter(models.Comments.comment_category == category)
 
-    # Fetch results
-    results = query.all()
+        # Fetch results
+        results = query.all()
 
-    # If no results, handle it gracefully
-    if not results:
-        raise HTTPException(status_code=404, detail="No comments found matching the criteria.")
+        # Return a friendly response when no data is found
+        if not results:
+            return []
 
-    return results
+        return results
+
+    except Exception as e:
+        # Handle unexpected errors (e.g., DB connection issues)
+        raise HTTPException(status_code=500, detail="An internal server error occurred.") from e
+
 
 @app.post("/comments/")
 async def create_comment(
