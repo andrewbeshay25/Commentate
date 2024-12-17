@@ -1,4 +1,4 @@
-# 📣 Commentate
+# 🗨️ Commentate
 
 **Commentate** is a small FastAPI-based backend game designed to manage friends' comments with filtering and categorization. Built with **FastAPI**, **PostgreSQL**, and **Docker**, it supports robust API endpoints to add, retrieve, and filter comments.
 
