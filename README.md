@@ -14,6 +14,10 @@
 - **Testing**: Comprehensive tests using `pytest` and `pytest-asyncio`.
 
 ---
+### Introduction Video
+Watch a quick intro to my project **[here](IS218_Final_Project.mp4)**.
+
+---
 ## ⚙️ Prerequisites
 
 Ensure you have the following installed:
